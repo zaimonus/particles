@@ -1,26 +1,5 @@
 import pygame
 
-from particles.components import Brightness, ColorShift, MovementHistory, Position
-from particles.rendering import Camera, RenderContext, render_system
-from particles.resources import GravityConfig, ParticleConfig
-from particles.world import tick, world
-
-# def main() -> None:
-#     FPS = 60
-#     DURATION = 30  # in seconds
-#     SPEED = 1
-
-#     frames = FPS * DURATION
-#     time_per_frame = SPEED / FPS
-
-#     print("[System] Starting simulation.")
-#     for i in range(1, frames + 1):
-#         print(f"[Info] Frame: {i}/{frames}", end="\r")
-#         tick(world, time_per_frame)
-#         draw_system(world.query(Position, MovementHistory, Brightness, ColorShift), world.resources.require(Cycles))
-#     print()
-#     print("[System] Done.")
-
 
 def main() -> None:
     FPS = 60
