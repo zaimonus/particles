@@ -18,6 +18,7 @@ from particles.resources import (
     GravityConfig,
     ParticleConfig,
     ParticleCounter,
+    SpawningConfig,
     Time,
 )
 from particles.vec import Vec
@@ -56,17 +57,25 @@ def brightness_system(
 
 def spawn_system(
     counter: Resource[Mutable[ParticleCounter]],
-    config: Resource[ParticleConfig],
+    particle_config: Resource[ParticleConfig],
+    spawn_config: Resource[SpawningConfig],
     commands: Commands,
 ) -> None:
     i = 0
-    while counter.alive < config.max_number:
-        angle = radians(uniform(0, 360))
-        radius = uniform(750, 1250)
+    while counter.alive < particle_config.max_number:
+        angle = radians(uniform(spawn_config.angle.min, spawn_config.angle.max))
+        radius = uniform(spawn_config.radius.min, spawn_config.radius.max)
         x = cos(angle) * radius
         y = sin(angle) * radius
 
-        va = radians(uniform(2, 60)) + angle
+        va = (
+            radians(
+                uniform(
+                    spawn_config.velocity_angle.min, spawn_config.velocity_angle.max
+                )
+            )
+            + angle
+        )
         vx = cos(va) * radius
         vy = sin(va) * radius
         dx = vx - x
@@ -77,10 +86,14 @@ def spawn_system(
             MovementHistory([]),
             Velocity(Vec(dx, dy)),
             Force(Vec(0, 0)),
-            Mass(uniform(5, 100)),
+            Mass(uniform(spawn_config.mass.min, spawn_config.mass.max)),
             Age(i),
             Brightness(0),
-            ColorShift(uniform(280, 320)),
+            ColorShift(
+                uniform(
+                    spawn_config.colorshift_angle.min, spawn_config.colorshift_angle.max
+                )
+            ),
         )
 
         i += 1

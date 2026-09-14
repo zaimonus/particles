@@ -9,11 +9,13 @@ from particles.components import (
 )
 from particles.ecs.commands import Commands, Invoker
 from particles.ecs.world import World
+from particles.range import Range
 from particles.resources import (
     Cycles,
     GravityConfig,
     ParticleConfig,
     ParticleCounter,
+    SpawningConfig,
     Time,
 )
 from particles.systems import (
@@ -41,9 +43,10 @@ def tick(world: World, dt: float):
     # Spawn new particles
     commands = Commands()
     spawn_system(
-        world.resources.require(ParticleCounter),
-        world.resources.require(ParticleConfig),
-        commands,
+        counter=world.resources.require(ParticleCounter),
+        particle_config=world.resources.require(ParticleConfig),
+        spawn_config=world.resources.require(SpawningConfig),
+        commands=commands,
     )
     Invoker(world).apply(commands)
 
