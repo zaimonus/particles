@@ -1,5 +1,10 @@
 import pygame
 
+from particles.rendering import Camera, RenderContext
+from particles.scene import Scene
+from particles.vec import Vec
+from particles.world import init_world
+
 
 def main() -> None:
     FPS = 60
@@ -12,71 +17,34 @@ def main() -> None:
     pygame.init()
     screen = pygame.display.set_mode(SIZE, pygame.FULLSCREEN)
     clock = pygame.time.Clock()
+    camera = Camera(
+        Vec(0, 0),
+        0.75,
+        Vec(WIDTH, HEIGHT),
+    )
+    context = RenderContext(screen, camera)
     running = True
 
-    camera = Camera(WIDTH // 2, HEIGHT // 2, 0.75)
-    context = RenderContext(screen, camera)
     accumulated = 0
     dt = 0
-    time = 1
-    
-    gravity = world.resources.require(GravityConfig)
-    particles = world.resources.require(ParticleConfig)
-    n_countdown = 0.2
+
+    scene = Scene(camera, init_world())
 
     while running:
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT or (
+                event.type == pygame.KEYDOWN and event.key == pygame.K_q
+            ):
                 running = False
+            else:
+                scene.handle_event(event)
 
         accumulated += min(dt, 0.25)
         while accumulated >= FIXED_TICK:
-            tick(world, FIXED_TICK * time)
+            scene.update(FIXED_TICK)
             accumulated -= FIXED_TICK
 
-        screen.fill((0, 0, 0))
-        render_system(
-            world.query(Position, MovementHistory, Brightness, ColorShift),
-            context,
-            world.resources.require(GravityConfig),
-        )
-
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_w]:
-            camera.y += 300 * dt
-        if keys[pygame.K_s]:
-            camera.y -= 300 * dt
-        if keys[pygame.K_a]:
-            camera.x += 300 * dt
-        if keys[pygame.K_d]:
-            camera.x -= 300 * dt
-
-        if keys[pygame.K_x]:
-            camera.zoom_to(camera.zoom + dt)
-        if keys[pygame.K_y]:
-            camera.zoom_to(camera.zoom - dt)
-
-        if keys[pygame.K_PLUS]:
-            time += 0.5
-        if keys[pygame.K_MINUS]:
-            time -= 0.5
-
-        if keys[pygame.K_LEFT]:
-            particles.max_number = max(particles.max_number - 10, 0)
-        if keys[pygame.K_RIGHT]:
-            particles.max_number += 10
-
-        if keys[pygame.K_UP]:
-            gravity.mass *= 2
-        if keys[pygame.K_DOWN]:
-            gravity.mass = max(gravity.mass / 2, 1)
-        if keys[pygame.K_n] and n_countdown < 0:
-            gravity.mass = -gravity.mass
-            n_countdown = 0.2
-        n_countdown -= dt
-
-        if keys[pygame.K_q]:
-            running = False
+        scene.render(context)
 
         pygame.display.flip()
         dt = clock.tick(FPS) / 1000

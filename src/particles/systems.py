@@ -132,7 +132,7 @@ def moving_system(
         position.value += velocity.value * dt
 
 
-def death_system(
+def death_by_distance_system(
     query: Query[Position],
     gravity: Resource[GravityConfig],
     counter: Resource[Mutable[ParticleCounter]],
